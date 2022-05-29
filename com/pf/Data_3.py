@@ -56,9 +56,32 @@ updated_for_null = trimmed_data.withColumn("Created_At",
                                          when(col("Gender").isNull(), lit("")).otherwise(
                                              col("Gender")))  # Handling NULL cases with default values.
 
-exclude_corrupt_salary_records = updated_for_null.filter(
+clean_amount_columns = updated_for_null.withColumn("Annual_Base_Salary",
+                                                   regexp_replace(col("Annual_Base_Salary"), "\$", "")).withColumn(
+    "Annual_Base_Salary",
+    regexp_replace(col("Annual_Base_Salary"), "\€", "")).withColumn(
+    "Annual_Base_Salary",
+    regexp_replace(col("Annual_Base_Salary"), ",", "")).withColumn("Annual_Base_Salary",
+                                                                   regexp_replace(col("Annual_Base_Salary"), "\£",
+                                                                                  "")).withColumn("Signing_Bonus",
+                                                                                                  regexp_replace(
+                                                                                                      col("Signing_Bonus"),
+                                                                                                      "\$",
+                                                                                                      "")).withColumn(
+    "Signing_Bonus",
+    regexp_replace(col("Signing_Bonus"), ",", "")).withColumn("Annual_Bonus",
+                                                              regexp_replace(col("Annual_Bonus"), "\£",
+                                                                             "")).withColumn("Annual_Bonus",
+                                                                                             regexp_replace(
+                                                                                                 col("Annual_Bonus"),
+                                                                                                 "\$",
+                                                                                                 "")).withColumn(
+    "Annual_Bonus",
+    regexp_replace(col("Annual_Bonus"), ",", "")).withColumn("Annual_Bonus",
+                                                             regexp_replace(col("Annual_Bonus"), "\£", ""))
+exclude_corrupt_salary_records = clean_amount_columns.filter(
     ~col("Annual_Base_Salary").rlike("[^0-9]"))  # Filtering out bad records while retaining good records.
-include_corrupt_salary_records = updated_for_null.filter(col("Annual_Base_Salary").rlike(
+include_corrupt_salary_records = clean_amount_columns.filter(col("Annual_Base_Salary").rlike(
     "[^0-9]"))  # Retaining bad records for Auditing. We can write these records to some location so that source people can fix this records or send out some kind of DD or Mapping Values using which we can standardize this column values.
 print(include_corrupt_salary_records.count())
 updated_gender = exclude_corrupt_salary_records.withColumn("Gender",
@@ -92,15 +115,20 @@ updated_annual_bonus = updated_job_title.filter(
     ~col("Annual_Bonus").rlike("[^0-9]"))  # Retaining numeric values ONLY for annual bonus.\
 corrupt_annual_bonus = updated_job_title.filter(
     col("Annual_Bonus").rlike("[^0-9]"))
+
+# corrupt_annual_bonus.show(100, truncate=False)
 corrupt_annual_bonus_records_along_with_salary = include_corrupt_salary_records.unionAll(
     corrupt_annual_bonus)  # Appending bad records
+
 updated_signing_bonus = updated_annual_bonus.filter(
     ~col("Signing_Bonus").rlike("[^0-9]"))  # Retaining numeric values ONLY for signing_bonus.
-corrup_signing_bonus_records = updated_annual_bonus.filter(
-    col("Signing_Bonus").rlike("[^0-9]"))
+corrupt_signing_bonus_records = updated_annual_bonus.filter(
+    col("Signing_Bonus").rlike("[^0-9]"))  # Separating bad records.
+# corrupt_signing_bonus_records.show(100, truncate=False)
 corrupt_signing_bonus_records_along_with_salary_and_annual = corrupt_annual_bonus_records_along_with_salary.unionAll(
-    corrup_signing_bonus_records)  # Appending final bad records for auditing..
+    corrupt_signing_bonus_records)  # Appending final bad records for auditing..
 
+corrupt_signing_bonus_records_along_with_salary_and_annual.show(100, truncate=False)
 print(corrupt_signing_bonus_records_along_with_salary_and_annual.count())
 print(updated_signing_bonus.count())
 updated_signing_bonus.show(400, truncate=False)
