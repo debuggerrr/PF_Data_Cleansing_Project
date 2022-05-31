@@ -1,15 +1,9 @@
-import io
-import pandas as pd
-from pyspark.sql import SparkSession
+
 from pyspark.sql.functions import *
-from pyspark.sql.types import *
-from pyspark.sql.window import Window
 
 
 class Data_1():
 
-    def __init__(self, spark: SparkSession):
-        self.spark = spark
 
     def Start(self, spark, path_data_1):
         df = spark.read.option("header", "true").option("multiline", "true").option("escape", "\"").csv(
@@ -31,16 +25,6 @@ class Data_1():
             trimmed_data = renamed_df.withColumn(i, trim(
                 col(i)))  # Removing of leading and trailing spaces from the dataset values.
 
-        # Casting of columns at the end.
-        # Remove double quotes from the column values -- Done
-        # Remove dollar / other currency signs and comma, space from the salary column.
-        # Convert the salary column to double/long format.
-        # Remove leading / Trailing spaces from the column values. -- Done
-        # Add consistency to the Location column
-        # Split up the Age and Experience columns in order to make the further aggregation computations easier. Make assumptions for null values if any -- Done
-        # Do casting of columns at the end because if the casting is successful then it would mean that the column records have been cleaned as per their expected data types or else it will throw an error if some value is not able to convert it to the asked data type.
-
-        # NULL VALUES: In the actual scenario would have confirmed from the client what to do with these "null" values. Whether they want it to be replaced/eliminate/ keep some default values for it.
 
         # trimmed_data.filter(col("Created_At") == '4/27/2019 1:02:05').select("*").show(truncate=False)
         updated_for_null = trimmed_data.withColumn("Created_At",

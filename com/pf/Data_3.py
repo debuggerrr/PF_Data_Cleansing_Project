@@ -1,13 +1,8 @@
-import pandas as pd
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import *
-from pyspark.sql.types import *
 
+from pyspark.sql.functions import *
 
 class Data_3():
 
-    def __init__(self, spark: SparkSession):
-        self.spark = spark
 
     def Start(self, spark, path_data_3):
         df = spark.read.option("header", "true").option("multiline", "true").option("escape", "\"").csv(
