@@ -45,7 +45,8 @@ Below are the **assumptions** made while cleaning these datasets:
 1) Take a git pull of this project. If unable to clone then download this project as a zip file and then unzip and import in your IDE.
 2) You can also directly create a new project from the version control option under file menu in IDE. Provide the link and import the project.
 3) Right-click on the project > module settings > modules > add content root > locate python folder from your unzipped spark folder and click on apply.
-4) You are ready to go. Run the invoker class and see the magic.
+4) Replace the files' path under Invoker.py file.
+5) You are ready to go. Run the invoker class and see the magic.
 
 
 **SCREENSHOTS:**
